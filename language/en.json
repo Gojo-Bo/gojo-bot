@@ -5,9 +5,9 @@
     },
     "plugins": {
         "antiarab": {
-            "texto1": "_*< ANTI-ARABS />*_\n\n*[ ℹ️ ] In this group, numbers starting with +212 are not allowed. Therefore, you will be removed from the group.*",
-            "texto2": "_*< ANTI-ARABS />*_\n\n*[ ℹ️ ] In this group, numbers starting with +265 are not allowed. Therefore, you will be removed from the group.*",
-            "texto3": "_*< ANTI-ARABS />*_\n\n*[ ℹ️ ] In this group, numbers starting with +92 are not allowed. Therefore, you will be removed from the group.*"
+            "texto1": "_*< ANTI-ARABS />*_\n\n*[ ℹ️ ] In this group, numbers starting with 850+ are not allowed. Therefore, you will be removed from the group.*",850
+            "texto2": "_*< ANTI-ARABS />*_\n\n*[ ℹ️ ] In this group, numbers starting with +255 are not allowed. Therefore, you will be removed from the group.*",
+            "texto3": "_*< ANTI-ARABS />*_\n\n*[ ℹ️ ] In this group, numbers starting with +93 are not allowed. Therefore, you will be removed from the group.*"
         },
         "_antilink": {
             "texto1": "*< ANTI-LINK />*_\n\n*[ ℹ️ ] Antilink is enabled, but the participant who sent the link is an administrator.*",
