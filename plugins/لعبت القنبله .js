@@ -1,88 +1,43 @@
-// https://whatsapp.com/channel/0029Vab5oDNElagpHtJjmT0B
-export async function before(m) {
-    try {
-        let id = m.chat;
-        let timeout = 180000;
-        let reward = randomInt(100, 80000);
-        let users = global.db.data.users[m.sender];
-        let body = typeof m.text == 'string' ? m.text : false;
-        this.bomb = this.bomb ? this.bomb : {};
+let handler = async (m, { conn }) => {
+    conn.bomb = conn.bomb || {};
+    let id = m.chat,
+        timeout = 180000;
+    if (id in conn.bomb) return conn.reply(m.chat, 'هذه الدورة لم تنته بعد!', conn.bomb[id][0]);
 
-        if (!this.bomb[id]) return false;
+    const bom = ['💥', '✅', '✅', '✅', '✅', '✅', '✅', '✅', '✅'].sort(() => Math.random() - 0.5);
+    const number = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
+    const array = bom.map((v, i) => ({
+        emot: v,
+        number: number[i],
+        position: i + 1,
+        state: false
+    }));
 
-        let isSurrender = /^((me)?nyerah|surr?ender)$/i.test(m.text);
-        if (isSurrender) {
-            await this.reply(m.chat, `استسلمت :(`, m);
-            clearTimeout(this.bomb[id][2]);
-            delete this.bomb[id];
-        }
-
-        if (this.bomb[id] && m.quoted && m.quoted.id == this.bomb[id][3].id && !isNaN(body)) {
-            let json = this.bomb[id][1].find(v => v.position == body);
-            if (!json) return this.reply(m.chat, `🚩 لفتح الصندوق، أرسل أرقام من 1 إلى 9.`, m);
-
-            if (json.emot == '💥') {
-                json.state = true;
-                let bomb = this.bomb[id][1];
-                let teks = `乂  *B O M B*\n\n`;
-                teks += bomb.slice(0, 3).map(v => v.state ? v.emot : v.number).join('') + '\n';
-                teks += bomb.slice(3, 6).map(v => v.state ? v.emot : v.number).join('') + '\n';
-                teks += bomb.slice(6).map(v => v.state ? v.emot : v.number).join('') + '\n\n';
-                teks += `نفذ الوقت: [ *${((timeout / 1000) / 60)} menit* ]\n`;
-                teks += `انتهت اللعبة! يتم فتح الصندوق الذي يحتوي على القنبلة: (- *${formatNumber(reward)}*)`;
-
-                this.reply(m.chat, teks, m).then(() => {
-                    users.exp < reward ? users.exp = 0 : users.exp -= reward;
-                    clearTimeout(this.bomb[id][2]);
-                    delete this.bomb[id];
-                });
-            } else if (json.state) {
-                return this.reply(m.chat, `🚩 تم فتح مربع ${json.number}، يرجى تحديد مربع آخر.`, m);
-            } else {
-                json.state = true;
-                let changes = this.bomb[id][1];
-                let open = changes.filter(v => v.state && v.emot != '💥').length;
-
-                if (open >= 8) {
-                    let teks = `乂  *B O M B*\n\n`;
-                    teks += `ارسل الأرقام *1* - *9* لفتح *9* مربع الأرقام أدناه :\n\n`;
-                    teks += changes.slice(0, 3).map(v => v.state ? v.emot : v.number).join('') + '\n';
-                    teks += changes.slice(3, 6).map(v => v.state ? v.emot : v.number).join('') + '\n';
-                    teks += changes.slice(6).map(v => v.state ? v.emot : v.number).join('') + '\n\n';
-                    teks += `نفذ الوقت: [ *${((timeout / 1000) / 60)} menit* ]\n`;
-                    teks += `انتهت اللعبة! الصندوق الذي يحتوي على القنبلة لم يتم فتحه: (+ *${formatNumber(reward)}*)`;
-
-                    this.reply(m.chat, teks, m).then(() => {
-                        users.exp += reward;
-                        clearTimeout(this.bomb[id][2]);
-                        delete this.bomb[id];
-                    });
-                } else {
-                    let teks = `乂  *B O M B*\n\n`;
-                    teks += `أرسل الأرقام *1* - *9* لفتح مربع الأرقام *9* أدناه :\n\n`;
-                    teks += changes.slice(0, 3).map(v => v.state ? v.emot : v.number).join('') + '\n';
-                    teks += changes.slice(3, 6).map(v => v.state ? v.emot : v.number).join('') + '\n';
-                    teks += changes.slice(6).map(v => v.state ? v.emot : v.number).join('') + '\n\n';
-                    teks += `نفذ الوقت: [ *${((timeout / 1000) / 60)} menit* ]\n`;
-                    teks += `ولم يتم فتح الصندوق الذي يحتوي على القنبلة: (+ *${formatNumber(reward)}*)`;
-
-                    this.reply(m.chat, teks, m).then(() => {
-                        users.exp += reward;
-                    });
-                }
-            }
-        }
-    } catch (e) {
-        console.log(e);
+    let teks = "乂 *B O M B*\nأرسل الأرقام *1* - *9* لفتح صندوق الأرقام *9* أدناه:\n\n";
+    for (let i = 0; i < array.length; i += 3) {
+        teks += array.slice(i, i + 3).map(v => v.state ? v.emot : v.number).join('') + '\n';
     }
-}
+    teks += `\nانتهى الوقت : [ *${((timeout / 1000) / 60)} menit* ]\nمتى عندما تحصل على صندوق يحتوي على قنبلة، سيتم خصم النقاط.`;
 
-export const exp = 0;
+    let msg = await conn.reply(m.chat, teks, m);
+    let { key } = msg;
 
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+    let v;
+    conn.bomb[id] = [
+        msg,
+        array,
+        setTimeout(() => {
+            v = array.find(v => v.emot == '💥');
+            if (conn.bomb[id]) conn.reply(m.chat, `انتهى الوقت! القنبلة موجودة في صندوق الأرقام ${v.number}.`, conn.bomb[id][0].key);
+            delete conn.bomb[id];
+        }, timeout),
+        key
+    ];
 
-function formatNumber(number) {
-    return number.toLocaleString();
-}
+};
+
+handler.help = ["بوملعبت"];
+handler.tags = ["game"];
+handler.command = /^(بومب)$/i;
+
+export default handler;
